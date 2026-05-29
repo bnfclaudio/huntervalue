@@ -7,16 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --bg:#0a0a0a;--bg2:#111;--bg3:#161616;
-    --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-    --text:#f0f0f0;--muted:#999;
-    --green:#00d97e;--red:#ff4d4d;--blue:#4da6ff;--amber:#c8922a;
-    --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
-  }
+  :root{--bg:#0a0a0a;--bg2:#111;--bg3:#161616;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#f0f0f0;--muted:#999;--green:#00d97e;--red:#ff4d4d;--blue:#4da6ff;--amber:#c8922a;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif}
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
-
   .header{border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);z-index:100}
   .logo{font-family:var(--mono);font-size:16px;font-weight:600;letter-spacing:2px;text-transform:uppercase}
   .logo span{color:var(--green)}
@@ -25,50 +18,59 @@
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
   .live-label{font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:1px}
   .last-update{font-family:var(--mono);font-size:12px;color:var(--muted)}
-
   .container{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 65px)}
 
-  /* SIDEBAR */
+  /* SIDEBAR DESKTOP */
   .sidebar{border-right:1px solid var(--border);padding:20px 0;overflow-y:auto;max-height:calc(100vh - 65px);position:sticky;top:65px}
   .sidebar-label{font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--amber);text-transform:uppercase;padding:0 18px 14px;font-weight:500}
-  .month-item{padding:14px 18px;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s}
+
+  /* ANNO ACCORDION */
+  .year-block{margin-bottom:4px}
+  .year-header{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;cursor:pointer;background:var(--bg3);border-left:2px solid var(--amber);transition:background 0.15s}
+  .year-header:hover{background:var(--bg2)}
+  .year-title{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--amber)}
+  .year-stats{display:flex;gap:10px;align-items:center}
+  .year-stat{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .year-stat.green{color:var(--green)}.year-stat.red{color:var(--red)}
+  .year-arrow{font-size:10px;color:var(--muted);transition:transform 0.2s}
+  .year-arrow.open{transform:rotate(90deg)}
+  .year-months{display:none}
+  .year-months.open{display:block}
+
+  /* MESE SIDEBAR */
+  .month-item{padding:12px 18px 12px 28px;cursor:pointer;border-left:2px solid transparent;transition:all 0.15s}
   .month-item:hover{background:var(--bg2)}
   .month-item.active{border-left-color:var(--green);background:var(--bg2)}
-  .month-name{font-size:16px;font-weight:600;margin-bottom:10px;color:var(--text)}
-  .month-mini{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .ms{display:flex;flex-direction:column;gap:3px}
-  .ms-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--amber);font-weight:500}
-  .ms-value{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text)}
+  .month-name{font-size:14px;font-weight:600;margin-bottom:8px;color:var(--text)}
+  .month-mini{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .ms{display:flex;flex-direction:column;gap:2px}
+  .ms-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--amber);font-weight:500}
+  .ms-value{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text)}
   .ms-value.green{color:var(--green)}.ms-value.red{color:var(--red)}.ms-value.blue{color:var(--blue)}
-  .wl-value{font-family:var(--mono);font-size:15px;font-weight:600}
+  .wl-value{font-family:var(--mono);font-size:13px;font-weight:600}
   .wl-value .w{color:var(--green)}.wl-value .sep{color:var(--muted)}.wl-value .l{color:var(--red)}
 
   /* MAIN */
   .main{padding:28px 32px;overflow-y:auto}
   .section-header{font-family:var(--mono);font-size:13px;letter-spacing:2px;color:var(--amber);text-transform:uppercase;margin-bottom:16px;font-weight:500}
 
-  /* KPI STRIP GLOBALE — 6 celle */
+  /* KPI */
   .kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px}
   .kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;position:relative;overflow:hidden}
   .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-  .kpi-card.green::before{background:var(--green)}
-  .kpi-card.blue::before{background:var(--blue)}
-  .kpi-card.amber::before{background:var(--amber)}
-  .kpi-card.purple::before{background:#a855f7}
+  .kpi-card.green::before{background:var(--green)}.kpi-card.blue::before{background:var(--blue)}.kpi-card.amber::before{background:var(--amber)}
   .kpi-label{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--amber);text-transform:uppercase;margin-bottom:10px;font-weight:500}
   .kpi-value{font-family:var(--mono);font-size:24px;font-weight:600;line-height:1}
-  .kpi-value.green{color:var(--green)}.kpi-value.blue{color:var(--blue)}.kpi-value.amber{color:var(--amber)}.kpi-value.red{color:var(--red)}.kpi-value.purple{color:#a855f7}
+  .kpi-value.green{color:var(--green)}.kpi-value.blue{color:var(--blue)}.kpi-value.amber{color:var(--amber)}.kpi-value.red{color:var(--red)}
   .kpi-sub{font-size:12px;color:var(--muted);margin-top:7px}
   .kpi-wl .w{color:var(--green);font-family:var(--mono);font-size:12px;font-weight:600}
   .kpi-wl .sep{color:var(--muted);font-size:12px}
   .kpi-wl .l{color:var(--red);font-family:var(--mono);font-size:12px;font-weight:600}
-
-  /* KPI MESE — 6 celle identiche */
   .month-kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:24px}
   .mkpi{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:16px}
   .mkpi-label{font-size:12px;color:var(--amber);margin-bottom:8px;font-weight:500;text-transform:uppercase;letter-spacing:1px}
   .mkpi-value{font-family:var(--mono);font-size:22px;font-weight:600}
-  .mkpi-value.green{color:var(--green)}.mkpi-value.red{color:var(--red)}.mkpi-value.blue{color:var(--blue)}.mkpi-value.amber{color:var(--amber)}.mkpi-value.purple{color:#a855f7}
+  .mkpi-value.green{color:var(--green)}.mkpi-value.red{color:var(--red)}.mkpi-value.blue{color:var(--blue)}.mkpi-value.amber{color:var(--amber)}
 
   /* CHARTS */
   .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
@@ -96,6 +98,18 @@
   .sstat-value.green{color:var(--green)}.sstat-value.red{color:var(--red)}
   .win-bar{height:3px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
   .win-fill{height:100%;border-radius:2px;transition:width 0.8s ease}
+  .divider{height:1px;background:var(--border);margin:0 0 20px}
+
+  /* MOBILE */
+  #mobileMesi{display:none}
+  .mob-year-block{margin-bottom:8px}
+  .mob-year-header{padding:8px 16px;background:var(--bg3);border-radius:8px;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--amber);cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+  .mob-months-row{display:none;overflow-x:auto;white-space:nowrap;padding:0 0 8px 0;-webkit-overflow-scrolling:touch}
+  .mob-months-row.open{display:block}
+  .mob-months-row::-webkit-scrollbar{height:3px}
+  .mob-months-row::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+  .mob-btn{display:inline-block;padding:7px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;margin-right:8px;white-space:nowrap;transition:all 0.15s}
+  .mob-btn.active{background:var(--green);color:#000;border-color:var(--green);font-weight:600}
 
   .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px}
   .loading-spinner{width:32px;height:32px;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite}
@@ -103,11 +117,34 @@
   .loading-text{font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:1px}
   .error-box{background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.25);border-radius:8px;padding:20px;margin:24px;font-family:var(--mono);font-size:13px;color:var(--red)}
   .footer{border-top:1px solid var(--border);padding:16px 32px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1px;display:flex;justify-content:space-between}
-  .divider{height:1px;background:var(--border);margin:0 0 20px}
+
+  @media(max-width:900px){
+    .header{padding:14px 16px}
+    .logo{font-size:13px;letter-spacing:1px}
+    .last-update{display:none}
+    .container{grid-template-columns:1fr}
+    .sidebar{display:none}
+    #mobileMesi{display:block;padding:12px 16px 0}
+    .main{padding:0 16px 16px}
+    .section-header{font-size:11px;margin-bottom:10px}
+    .kpi-strip{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+    .kpi-card{padding:12px}
+    .kpi-label{font-size:9px;margin-bottom:6px}
+    .kpi-value{font-size:20px}
+    .kpi-sub{font-size:11px}
+    .month-kpi-grid{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+    .mkpi{padding:12px}
+    .mkpi-label{font-size:10px;margin-bottom:5px}
+    .mkpi-value{font-size:18px}
+    .charts-row{grid-template-columns:1fr;gap:12px}
+    .clv-grid{grid-template-columns:1fr;gap:10px}
+    .clv-stat-value{font-size:22px}
+    .sport-grid{grid-template-columns:1fr}
+    .footer{flex-direction:column;gap:4px;padding:12px 16px;font-size:10px}
+  }
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="logo">Hunter<span>Value</span>Betting</div>
   <div class="header-right">
@@ -116,90 +153,42 @@
     <span class="last-update" id="lastUpdate">—</span>
   </div>
 </div>
-
 <div id="loadingView" class="loading">
   <div class="loading-spinner"></div>
   <div class="loading-text">CARICAMENTO DATI...</div>
 </div>
 <div id="errorView" style="display:none"><div class="error-box" id="errorMsg"></div></div>
-
 <div id="mainView" style="display:none">
+  <div id="mobileMesi"></div>
   <div class="container">
     <div class="sidebar">
       <div class="sidebar-label">Storico mensile</div>
       <div id="sidebarMonths"></div>
     </div>
     <div class="main">
-
-      <!-- RIGA 1: TOTALE GLOBALE -->
-      <div class="section-header">— Riepilogo globale</div>
+      <div class="section-header" style="margin-bottom:14px">— Riepilogo globale</div>
       <div class="kpi-strip">
-        <div class="kpi-card blue">
-          <div class="kpi-label">Bet / Stake</div>
-          <div class="kpi-value blue" id="kpiBetTot">—</div>
-          <div class="kpi-sub" id="kpiStakeTot">—</div>
-        </div>
-        <div class="kpi-card green">
-          <div class="kpi-label">Profit totale</div>
-          <div class="kpi-value green" id="kpiProfitTot">—</div>
-          <div class="kpi-sub" id="kpiProfitSub">—</div>
-        </div>
-        <div class="kpi-card green">
-          <div class="kpi-label">ROI totale</div>
-          <div class="kpi-value green" id="kpiRoiTot">—</div>
-          <div class="kpi-sub">su tutte le bet chiuse</div>
-        </div>
-        <div class="kpi-card amber">
-          <div class="kpi-label">Quota media</div>
-          <div class="kpi-value amber" id="kpiQmedia">—</div>
-          <div class="kpi-sub">valore medio alert</div>
-        </div>
-        <div class="kpi-card blue">
-          <div class="kpi-label">Win rate</div>
-          <div class="kpi-value blue" id="kpiWinRate">—</div>
-          <div class="kpi-sub kpi-wl" id="kpiWL">—</div>
-        </div>
-        <div class="kpi-card amber">
-          <div class="kpi-label">CLV totale</div>
-          <div class="kpi-value amber" id="kpiClvTot">—</div>
-          <div class="kpi-sub" id="kpiClvN">—</div>
-        </div>
+        <div class="kpi-card blue"><div class="kpi-label">Bet / Stake</div><div class="kpi-value blue" id="kpiBetTot">—</div><div class="kpi-sub" id="kpiStakeTot">—</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Profit totale</div><div class="kpi-value green" id="kpiProfitTot">—</div><div class="kpi-sub" id="kpiProfitSub">—</div></div>
+        <div class="kpi-card green"><div class="kpi-label">ROI totale</div><div class="kpi-value green" id="kpiRoiTot">—</div><div class="kpi-sub">su tutte le bet chiuse</div></div>
+        <div class="kpi-card amber"><div class="kpi-label">Quota media</div><div class="kpi-value amber" id="kpiQmedia">—</div><div class="kpi-sub">valore medio alert</div></div>
+        <div class="kpi-card blue"><div class="kpi-label">Win rate</div><div class="kpi-value blue" id="kpiWinRate">—</div><div class="kpi-sub kpi-wl" id="kpiWL">—</div></div>
+        <div class="kpi-card amber"><div class="kpi-label">CLV totale</div><div class="kpi-value amber" id="kpiClvTot">—</div><div class="kpi-sub" id="kpiClvN">—</div></div>
       </div>
-
       <div class="divider"></div>
-
-      <!-- RIGA 2: MESE CORRENTE -->
       <div class="section-header" id="monthSectionLabel">— Mese corrente</div>
       <div class="month-kpi-grid">
-        <div class="mkpi">
-          <div class="mkpi-label">Bet / Stake</div>
-          <div class="mkpi-value blue" id="mBet">—</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:5px" id="mStake">—</div>
-        </div>
+        <div class="mkpi"><div class="mkpi-label">Bet / Stake</div><div class="mkpi-value blue" id="mBet">—</div><div style="font-size:12px;color:var(--muted);margin-top:5px" id="mStake">—</div></div>
         <div class="mkpi"><div class="mkpi-label">Profit</div><div class="mkpi-value green" id="mProfit">—</div></div>
         <div class="mkpi"><div class="mkpi-label">ROI</div><div class="mkpi-value green" id="mRoi">—</div></div>
         <div class="mkpi"><div class="mkpi-label">Quota media</div><div class="mkpi-value amber" id="mQmedia">—</div></div>
-        <div class="mkpi">
-          <div class="mkpi-label">Win rate</div>
-          <div class="mkpi-value blue" id="mWinRate">—</div>
-          <div style="font-size:12px;margin-top:5px" id="mWL">—</div>
-        </div>
+        <div class="mkpi"><div class="mkpi-label">Win rate</div><div class="mkpi-value blue" id="mWinRate">—</div><div style="font-size:12px;margin-top:5px" id="mWL">—</div></div>
         <div class="mkpi"><div class="mkpi-label">CLV medio</div><div class="mkpi-value amber" id="mClv">—</div></div>
       </div>
-
-      <!-- GRAFICI -->
       <div class="charts-row">
-        <div class="chart-card">
-          <div class="chart-title">— Profit cumulativo bet per bet</div>
-          <div style="position:relative;height:160px"><canvas id="chartCapital"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">— ROI mensile (%)</div>
-          <div style="position:relative;height:160px"><canvas id="chartRoi"></canvas></div>
-        </div>
+        <div class="chart-card"><div class="chart-title">— Profit cumulativo bet per bet</div><div style="position:relative;height:160px"><canvas id="chartCapital"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">— ROI mensile (%)</div><div style="position:relative;height:160px"><canvas id="chartRoi"></canvas></div></div>
       </div>
-
-      <!-- CLV -->
       <div class="clv-card">
         <div class="chart-title">— Closing Line Value</div>
         <div class="clv-grid">
@@ -208,8 +197,6 @@
           <div class="clv-stat"><div class="clv-stat-value amber" id="clvGlobal">—</div><div class="clv-stat-label">CLV medio globale</div></div>
         </div>
       </div>
-
-      <!-- SPORT -->
       <div class="section-header">— Breakdown per sport</div>
       <div class="sport-grid" id="sportGrid"></div>
     </div>
@@ -219,82 +206,57 @@
     <span id="footerUpdate">—</span>
   </div>
 </div>
-
 <script>
 const SHEET_ID='1Azl_VDDx_Np5lI8ECPTkSpb8vTNMxLYhCFxNfgCBF74';
 const API_KEY='AIzaSyClSsSuVOowq016EkeuBXjxCPPHkGAuRaM';
-
 const SPORT_COLORS={'calcio':'#00d97e','basket':'#4da6ff','tennis':'#ffb84d','hockey ghiaccio':'#ff6b9d','volleyball':'#b84dff','handball':'#ff9d4d','football americano':'#4dffee','e sports':'#ff4d4d'};
+let allBets=[],selectedMonth=null,openYears={},chartCapital,chartRoi;
 
-let allBets=[],selectedMonth=null,chartCapital,chartRoi;
-
-// ---- FETCH con valori non formattati ----
 async function fetchAllSheets(){
   const meta=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?key=${API_KEY}`).then(r=>r.json());
-  if(meta.error) throw new Error(meta.error.message);
+  if(meta.error)throw new Error(meta.error.message);
   let rows=[];
   for(const s of meta.sheets){
     const enc=encodeURIComponent(s.properties.title);
     const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${enc}!A:AB?key=${API_KEY}&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING`;
     const data=await fetch(url).then(r=>r.json());
-    if(data.values&&data.values.length>1) rows=rows.concat(data.values.slice(1));
+    if(data.values&&data.values.length>1)rows=rows.concat(data.values.slice(1));
   }
   return rows;
 }
 
-// ---- PARSING NUMERI (gestisce €, virgole, testo) ----
 function pf(s){
-  if(s===null||s===undefined||s==='') return null;
-  if(typeof s==='number') return isNaN(s)?null:s;
+  if(s===null||s===undefined||s==='')return null;
+  if(typeof s==='number')return isNaN(s)?null:s;
   let str=String(s).trim().replace(/€/g,'').replace(/\s/g,'');
-  const neg=str.startsWith('-');
-  str=str.replace(/-/g,'');
-  if(str.includes(',')&&str.includes('.')) str=str.replace(/\./g,'').replace(',','.');
+  const neg=str.startsWith('-');str=str.replace(/-/g,'');
+  if(str.includes(',')&&str.includes('.'))str=str.replace(/\./g,'').replace(',','.');
   else str=str.replace(',','.');
-  if(!str||str==='.') return null;
+  if(!str||str==='.')return null;
   const v=parseFloat(str);
   return isNaN(v)?null:(neg?-v:v);
 }
 
-// ---- PARSING DATA ----
 function parseDate(s){
-  if(!s) return null;
+  if(!s)return null;
   const part=String(s).split(' ')[0];
   if(part.includes('/')){
     const[d,m,y]=part.split('/');
-    if(!d||!m||!y) return null;
+    if(!d||!m||!y)return null;
     const dt=new Date(`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
     return isNaN(dt)?null:dt;
-  } else if(part.includes('-')){
-    const dt=new Date(part);
-    return isNaN(dt)?null:dt;
+  }else if(part.includes('-')){
+    const dt=new Date(part);return isNaN(dt)?null:dt;
   }
   return null;
 }
 
-// ---- PARSE SINGOLA BET ----
-// Salta righe non valide (header secondari, righe vuote, ecc.)
 function parseBet(row){
   const esito=String(row[17]||'').trim().toUpperCase();
-  if(!['WIN','LOSS','VOID'].includes(esito)) return null;
-
-  const dateObj=parseDate(row[0]||'');
-  const bilancio=pf(row[20]);   // col U — BILANCIO
-  const valueQ=pf(row[13]);     // col N — VALUE_Q (quota alert)
-  const clvPct=pf(row[27]);     // col AB — CLV%
-  const sport=String(row[2]||'').trim().toLowerCase();
-
-  return{
-    data:dateObj,
-    sport,
-    esito,
-    bilancio:bilancio!==null?bilancio:0,
-    valueQ,   // per quota media
-    clvPct
-  };
+  if(!['WIN','LOSS','VOID'].includes(esito))return null;
+  return{data:parseDate(row[0]||''),sport:String(row[2]||'').trim().toLowerCase(),esito,bilancio:pf(row[20])||0,valueQ:pf(row[13]),clvPct:pf(row[27])};
 }
 
-// ---- STATISTICHE ----
 function calcStats(bets){
   const wins=bets.filter(b=>b.esito==='WIN').length;
   const losses=bets.filter(b=>b.esito==='LOSS').length;
@@ -304,7 +266,6 @@ function calcStats(bets){
   const winRate=(wins+losses)>0?(wins/(wins+losses))*100:0;
   const clvBets=bets.filter(b=>b.clvPct!==null);
   const clvMean=clvBets.length>0?clvBets.reduce((s,b)=>s+b.clvPct,0)/clvBets.length:null;
-  // quota media: solo bet con valueQ valido
   const qBets=bets.filter(b=>b.valueQ!==null&&b.valueQ>1);
   const qMedia=qBets.length>0?qBets.reduce((s,b)=>s+b.valueQ,0)/qBets.length:null;
   return{total:bets.length,wins,losses,profit,invested,roi,winRate,clvMean,clvBets,qMedia};
@@ -313,10 +274,20 @@ function calcStats(bets){
 function groupByMonth(bets){
   const map={};
   bets.forEach(b=>{
-    if(!b.data) return;
+    if(!b.data)return;
     const k=`${b.data.getFullYear()}-${String(b.data.getMonth()+1).padStart(2,'0')}`;
-    if(!map[k]) map[k]=[];
+    if(!map[k])map[k]=[];
     map[k].push(b);
+  });
+  return map;
+}
+
+function groupByYear(monthMap){
+  const map={};
+  Object.keys(monthMap).forEach(k=>{
+    const y=k.split('-')[0];
+    if(!map[y])map[y]=[];
+    map[y].push(k);
   });
   return map;
 }
@@ -325,76 +296,121 @@ function monthLabel(k){
   const[y,m]=k.split('-');
   return['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'][parseInt(m)-1]+' '+y;
 }
-
-function fmt(n,dec=1,sign=false){
-  if(n===null||n===undefined||isNaN(n)) return '—';
-  return(n<0?'-':(sign?'+':''))+Math.abs(n).toFixed(dec);
+function monthShort(k){
+  const[y,m]=k.split('-');
+  return['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'][parseInt(m)-1];
 }
-function fmtEur(n){
-  if(n===null||isNaN(n)) return '—';
-  return(n<0?'-€':'+€')+Math.abs(n).toFixed(0);
-}
+function fmt(n,dec=1,sign=false){if(n===null||n===undefined||isNaN(n))return'—';return(n<0?'-':(sign?'+':''))+Math.abs(n).toFixed(dec)}
+function fmtEur(n){if(n===null||isNaN(n))return'—';return(n<0?'-€':'+€')+Math.abs(n).toFixed(0)}
 function cc(n){return n>=0?'green':'red'}
 function wlHtml(w,l){return`<span class="w">${w}</span><span class="sep">/</span><span class="l">${l}</span>`}
 
-// ---- RENDER SIDEBAR ----
 function renderSidebar(monthMap,activeKey){
-  const keys=Object.keys(monthMap).sort().reverse();
+  const yearMap=groupByYear(monthMap);
+  const years=Object.keys(yearMap).sort().reverse();
   const el=document.getElementById('sidebarMonths');
   el.innerHTML='';
-  keys.forEach(k=>{
-    const s=calcStats(monthMap[k]);
-    const div=document.createElement('div');
-    div.className='month-item'+(k===activeKey?' active':'');
-    div.innerHTML=`
-      <div class="month-name">${monthLabel(k)}</div>
-      <div class="month-mini">
-        <div class="ms"><span class="ms-label">Bet</span><span class="ms-value blue">${monthMap[k].length}</span></div>
-        <div class="ms"><span class="ms-label">W/L</span><span class="wl-value">${wlHtml(s.wins,s.losses)}</span></div>
-        <div class="ms"><span class="ms-label">ROI</span><span class="ms-value ${cc(s.roi)}">${fmt(s.roi,1,true)}%</span></div>
-        <div class="ms"><span class="ms-label">Profit</span><span class="ms-value ${cc(s.profit)}">${fmtEur(s.profit)}</span></div>
-      </div>`;
-    div.onclick=()=>{selectedMonth=k;renderAll()};
-    el.appendChild(div);
+  const mob=document.getElementById('mobileMesi');
+  mob.innerHTML='';
+
+  years.forEach(year=>{
+    const monthKeys=yearMap[year].sort().reverse();
+    const yearBets=monthKeys.flatMap(k=>monthMap[k]);
+    const ys=calcStats(yearBets);
+
+    // Apri di default l'anno corrente
+    if(!(year in openYears))openYears[year]=(year===String(new Date().getFullYear()));
+
+    // SIDEBAR DESKTOP — accordion anno
+    const yBlock=document.createElement('div');
+    yBlock.className='year-block';
+    const yHeader=document.createElement('div');
+    yHeader.className='year-header';
+    yHeader.innerHTML=`
+      <span class="year-title">${year}</span>
+      <span class="year-stats">
+        <span class="year-stat ${cc(ys.profit)}">${fmtEur(ys.profit)}</span>
+        <span class="year-stat ${cc(ys.roi)}">${fmt(ys.roi,1,true)}%</span>
+      </span>
+      <span class="year-arrow ${openYears[year]?'open':''}">▶</span>`;
+    const yMonths=document.createElement('div');
+    yMonths.className='year-months'+(openYears[year]?' open':'');
+
+    yHeader.onclick=()=>{
+      openYears[year]=!openYears[year];
+      yMonths.classList.toggle('open',openYears[year]);
+      yHeader.querySelector('.year-arrow').classList.toggle('open',openYears[year]);
+    };
+
+    monthKeys.forEach(k=>{
+      const s=calcStats(monthMap[k]);
+      const div=document.createElement('div');
+      div.className='month-item'+(k===activeKey?' active':'');
+      div.innerHTML=`<div class="month-name">${monthLabel(k)}</div><div class="month-mini"><div class="ms"><span class="ms-label">Bet</span><span class="ms-value blue">${monthMap[k].length}</span></div><div class="ms"><span class="ms-label">W/L</span><span class="wl-value">${wlHtml(s.wins,s.losses)}</span></div><div class="ms"><span class="ms-label">ROI</span><span class="ms-value ${cc(s.roi)}">${fmt(s.roi,1,true)}%</span></div><div class="ms"><span class="ms-label">Profit</span><span class="ms-value ${cc(s.profit)}">${fmtEur(s.profit)}</span></div></div>`;
+      div.onclick=()=>{selectedMonth=k;renderAll()};
+      yMonths.appendChild(div);
+    });
+
+    yBlock.appendChild(yHeader);
+    yBlock.appendChild(yMonths);
+    el.appendChild(yBlock);
+
+    // MOBILE — anno con mesi scorrevoli
+    const mobYBlock=document.createElement('div');
+    mobYBlock.className='mob-year-block';
+    const mobYHeader=document.createElement('div');
+    mobYHeader.className='mob-year-header';
+    mobYHeader.innerHTML=`<span>${year} <span style="font-size:11px;color:var(--muted);font-weight:400">${fmtEur(ys.profit)} · ${fmt(ys.roi,1,true)}%</span></span><span style="font-size:11px">${openYears[year]?'▲':'▼'}</span>`;
+    const mobMonthsRow=document.createElement('div');
+    mobMonthsRow.className='mob-months-row'+(openYears[year]?' open':'');
+
+    mobYHeader.onclick=()=>{
+      openYears[year]=!openYears[year];
+      mobMonthsRow.classList.toggle('open',openYears[year]);
+      mobYHeader.querySelector('span:last-child').textContent=openYears[year]?'▲':'▼';
+    };
+
+    monthKeys.forEach(k=>{
+      const btn=document.createElement('span');
+      btn.className='mob-btn'+(k===activeKey?' active':'');
+      btn.textContent=monthShort(k);
+      btn.onclick=()=>{selectedMonth=k;renderAll()};
+      mobMonthsRow.appendChild(btn);
+    });
+
+    mobYBlock.appendChild(mobYHeader);
+    mobYBlock.appendChild(mobMonthsRow);
+    mob.appendChild(mobYBlock);
   });
 }
 
-// ---- RENDER KPI GLOBALE ----
 function renderKpiGlobal(bets){
   const g=calcStats(bets);
-  // Bet / Stake
   document.getElementById('kpiBetTot').textContent=g.total;
   document.getElementById('kpiStakeTot').textContent=`€${(g.total*10).toLocaleString('it')} investiti`;
-  // Profit
-  const pe=document.getElementById('kpiProfitTot'); pe.textContent=fmtEur(g.profit); pe.className='kpi-value '+cc(g.profit);
+  const pe=document.getElementById('kpiProfitTot');pe.textContent=fmtEur(g.profit);pe.className='kpi-value '+cc(g.profit);
   document.getElementById('kpiProfitSub').textContent=`${g.wins+g.losses} bet con esito`;
-  // ROI
-  const re=document.getElementById('kpiRoiTot'); re.textContent=fmt(g.roi,1,true)+'%'; re.className='kpi-value '+cc(g.roi);
-  // Quota media
+  const re=document.getElementById('kpiRoiTot');re.textContent=fmt(g.roi,1,true)+'%';re.className='kpi-value '+cc(g.roi);
   document.getElementById('kpiQmedia').textContent=g.qMedia!==null?g.qMedia.toFixed(3):'—';
-  // Win rate
   document.getElementById('kpiWinRate').textContent=fmt(g.winRate,1)+'%';
   document.getElementById('kpiWL').innerHTML=wlHtml(g.wins,g.losses);
-  // CLV
-  const ce=document.getElementById('kpiClvTot'); ce.textContent=g.clvMean!==null?fmt(g.clvMean,2,true)+'%':'—'; ce.className='kpi-value '+(g.clvMean!==null?cc(g.clvMean):'amber');
+  const ce=document.getElementById('kpiClvTot');ce.textContent=g.clvMean!==null?fmt(g.clvMean,2,true)+'%':'—';ce.className='kpi-value '+(g.clvMean!==null?cc(g.clvMean):'amber');
   document.getElementById('kpiClvN').textContent=`${g.clvBets.length} bet con CLV`;
 }
 
-// ---- RENDER KPI MESE ----
 function renderMonthKpi(bets,k){
   const s=calcStats(bets);
   document.getElementById('monthSectionLabel').textContent=`— ${monthLabel(k)}`;
   document.getElementById('mBet').textContent=bets.length;
   document.getElementById('mStake').textContent=`€${(bets.length*10).toLocaleString('it')} investiti`;
-  const pe=document.getElementById('mProfit'); pe.textContent=fmtEur(s.profit); pe.className='mkpi-value '+cc(s.profit);
-  const re=document.getElementById('mRoi'); re.textContent=fmt(s.roi,1,true)+'%'; re.className='mkpi-value '+cc(s.roi);
+  const pe=document.getElementById('mProfit');pe.textContent=fmtEur(s.profit);pe.className='mkpi-value '+cc(s.profit);
+  const re=document.getElementById('mRoi');re.textContent=fmt(s.roi,1,true)+'%';re.className='mkpi-value '+cc(s.roi);
   document.getElementById('mQmedia').textContent=s.qMedia!==null?s.qMedia.toFixed(3):'—';
   document.getElementById('mWinRate').textContent=fmt(s.winRate,1)+'%';
   document.getElementById('mWL').innerHTML=`<span style="font-family:var(--mono);font-size:12px"><span style="color:var(--green)">${s.wins}</span><span style="color:var(--muted)">/</span><span style="color:var(--red)">${s.losses}</span></span>`;
-  const ce=document.getElementById('mClv'); ce.textContent=s.clvMean!==null?fmt(s.clvMean,2,true)+'%':'—'; ce.className='mkpi-value '+(s.clvMean!==null?cc(s.clvMean):'amber');
+  const ce=document.getElementById('mClv');ce.textContent=s.clvMean!==null?fmt(s.clvMean,2,true)+'%':'—';ce.className='mkpi-value '+(s.clvMean!==null?cc(s.clvMean):'amber');
 }
 
-// ---- RENDER GRAFICI ----
 function renderCharts(monthMap){
   const keys=Object.keys(monthMap).sort();
   const labels=keys.map(monthLabel);
@@ -402,23 +418,18 @@ function renderCharts(monthMap){
   const gc='rgba(255,255,255,0.05)',tc='#666';
   if(chartCapital)chartCapital.destroy();
   if(chartRoi)chartRoi.destroy();
-
-  // Profit cumulativo bet per bet
   const closedBets=allBets.filter(b=>['WIN','LOSS','VOID'].includes(b.esito)&&b.data).sort((a,b)=>a.data-b.data);
-  let cum=0;
-  const betLabels=[],betCumP=[];
+  let cum=0;const betLabels=[],betCumP=[];
   closedBets.forEach((b,i)=>{
     cum+=b.bilancio||0;
     const d=b.data;
     betLabels.push(i%Math.max(1,Math.floor(closedBets.length/8))===0?`${d.getDate()}/${d.getMonth()+1}`:'');
     betCumP.push(parseFloat(cum.toFixed(2)));
   });
-
   chartCapital=new Chart(document.getElementById('chartCapital'),{type:'line',data:{labels:betLabels,datasets:[{data:betCumP,borderColor:'#00d97e',backgroundColor:'rgba(0,217,126,0.06)',borderWidth:1.5,pointRadius:0,fill:true,tension:0.1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'€'+ctx.parsed.y.toFixed(0)}}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:10},maxRotation:0}},y:{grid:{color:gc},ticks:{color:tc,font:{size:11},callback:v=>'€'+v}}}}});
   chartRoi=new Chart(document.getElementById('chartRoi'),{type:'bar',data:{labels,datasets:[{data:rois,backgroundColor:rois.map(v=>v>=0?'rgba(0,217,126,0.7)':'rgba(255,77,77,0.7)'),borderRadius:3,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y.toFixed(1)+'%'}}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:11}}},y:{grid:{color:gc},ticks:{color:tc,font:{size:11},callback:v=>v+'%'}}}}});
 }
 
-// ---- RENDER CLV ----
 function renderClv(bets){
   const clvB=bets.filter(b=>b.clvPct!==null);
   const posB=clvB.filter(b=>b.clvPct>0);
@@ -427,26 +438,22 @@ function renderClv(bets){
   const pPct=clvB.length>0?(posB.length/clvB.length)*100:null;
   document.getElementById('clvMediaPos').textContent=pMean!==null?'+'+pMean.toFixed(2)+'%':'—';
   document.getElementById('clvPctPositive').textContent=pPct!==null?pPct.toFixed(1)+'%':'—';
-  const ge=document.getElementById('clvGlobal'); ge.textContent=gMean!==null?fmt(gMean,2,true)+'%':'—';
+  const ge=document.getElementById('clvGlobal');ge.textContent=gMean!==null?fmt(gMean,2,true)+'%':'—';
   if(gMean!==null)ge.className='clv-stat-value '+cc(gMean);
 }
 
-// ---- RENDER SPORT ----
 function renderSports(bets){
   const map={};
   bets.forEach(b=>{if(!b.sport)return;if(!map[b.sport])map[b.sport]=[];map[b.sport].push(b)});
-  const grid=document.getElementById('sportGrid');
-  grid.innerHTML='';
+  const grid=document.getElementById('sportGrid');grid.innerHTML='';
   Object.entries(map).sort((a,b)=>b[1].length-a[1].length).forEach(([sport,sb])=>{
     const s=calcStats(sb),col=SPORT_COLORS[sport]||'#888';
-    const card=document.createElement('div');
-    card.className='sport-card';
+    const card=document.createElement('div');card.className='sport-card';
     card.innerHTML=`<div class="sport-header"><div class="sport-dot" style="background:${col}"></div><div class="sport-name">${sport.charAt(0).toUpperCase()+sport.slice(1)}</div></div><div class="sport-stats"><div><div class="sstat-label">Bet</div><div class="sstat-value">${sb.length}</div></div><div><div class="sstat-label">ROI</div><div class="sstat-value ${cc(s.roi)}">${fmt(s.roi,1,true)}%</div></div><div><div class="sstat-label">Profit</div><div class="sstat-value ${cc(s.profit)}">${fmtEur(s.profit)}</div></div><div><div class="sstat-label">Win rate</div><div class="sstat-value">${fmt(s.winRate,1)}%</div></div></div><div class="win-bar"><div class="win-fill" style="width:${Math.min(s.winRate,100).toFixed(0)}%;background:${col}"></div></div>`;
     grid.appendChild(card);
   });
 }
 
-// ---- RENDER ALL ----
 function renderAll(){
   const monthMap=groupByMonth(allBets);
   const keys=Object.keys(monthMap).sort().reverse();
@@ -464,7 +471,6 @@ function renderAll(){
   document.getElementById('footerUpdate').textContent=`Dati aggiornati alle ${ts}`;
 }
 
-// ---- INIT ----
 async function init(){
   try{
     const rows=await fetchAllSheets();
