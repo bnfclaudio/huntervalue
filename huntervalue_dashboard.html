@@ -100,6 +100,20 @@
   .win-fill{height:100%;border-radius:2px;transition:width 0.8s ease}
   .divider{height:1px;background:var(--border);margin:0 0 20px}
 
+  /* CHANNEL TABS */
+  .channel-tabs{display:flex;gap:8px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:0}
+  .channel-tab{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:12px 20px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all 0.15s;background:none}
+  .channel-tab:hover{color:var(--text)}
+  .channel-tab.active{color:var(--text)}
+  .channel-tab.active.tab-base{border-bottom-color:var(--blue)}
+  .channel-tab.active.tab-top{border-bottom-color:var(--amber)}
+  .channel-tab.active.tab-pro{border-bottom-color:var(--green)}
+  .channel-tab .tab-badge{font-size:10px;color:var(--muted);margin-left:6px;font-weight:400}
+  @media(max-width:900px){
+    .channel-tabs{gap:6px}
+    .channel-tab{padding:14px 14px;font-size:12px}
+  }
+
   /* MOBILE */
   #mobileMesi{display:none}
   .mob-year-block{margin-bottom:8px}
@@ -166,6 +180,7 @@
       <div id="sidebarMonths"></div>
     </div>
     <div class="main">
+      <div id="channelTabs" class="channel-tabs"></div>
       <div class="section-header" style="margin-bottom:14px">— Riepilogo globale</div>
       <div class="kpi-strip">
         <div class="kpi-card blue"><div class="kpi-label">Bet / Stake</div><div class="kpi-value blue" id="kpiBetTot">—</div><div class="kpi-sub" id="kpiStakeTot">—</div></div>
@@ -210,7 +225,7 @@
 const SHEET_ID='1Azl_VDDx_Np5lI8ECPTkSpb8vTNMxLYhCFxNfgCBF74';
 const API_KEY='AIzaSyClSsSuVOowq016EkeuBXjxCPPHkGAuRaM';
 const SPORT_COLORS={'calcio':'#00d97e','basket':'#4da6ff','tennis':'#ffb84d','hockey ghiaccio':'#ff6b9d','volleyball':'#b84dff','handball':'#ff9d4d','football americano':'#4dffee','e sports':'#ff4d4d'};
-let allBets=[],selectedMonth=null,openYears={},chartCapital,chartRoi;
+let allBets=[],selectedMonth=null,selectedChannel='pro',openYears={},chartCapital,chartRoi;
 
 async function fetchAllSheets(){
   const meta=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?key=${API_KEY}`).then(r=>r.json());
@@ -218,7 +233,7 @@ async function fetchAllSheets(){
   let rows=[];
   for(const s of meta.sheets){
     const enc=encodeURIComponent(s.properties.title);
-    const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${enc}!A:AB?key=${API_KEY}&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING`;
+    const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${enc}!A:AD?key=${API_KEY}&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING`;
     const data=await fetch(url).then(r=>r.json());
     if(data.values&&data.values.length>1)rows=rows.concat(data.values.slice(1));
   }
@@ -254,7 +269,13 @@ function parseDate(s){
 function parseBet(row){
   const esito=String(row[17]||'').trim().toUpperCase();
   if(!['WIN','LOSS','VOID'].includes(esito))return null;
-  return{data:parseDate(row[0]||''),sport:String(row[2]||'').trim().toLowerCase(),esito,bilancio:pf(row[20])||0,valueQ:pf(row[13]),clvPct:pf(row[27])};
+  const canaliRaw=String(row[29]||'').trim().toLowerCase();
+  // righe storiche (precedenti alla colonna CANALI) non hanno questo campo -
+  // trattate come "pro" (il vecchio sistema mandava ogni alert senza filtri,
+  // stesso comportamento di pro oggi) - NON su base/top, che non hanno mai
+  // superato davvero, storicamente
+  const canali=canaliRaw?canaliRaw.split(',').map(c=>c.trim()).filter(Boolean):['pro'];
+  return{data:parseDate(row[0]||''),sport:String(row[2]||'').trim().toLowerCase(),esito,bilancio:pf(row[20])||0,valueQ:pf(row[13]),clvPct:pf(row[27]),canali};
 }
 
 function calcStats(bets){
@@ -384,6 +405,20 @@ function renderSidebar(monthMap,activeKey){
   });
 }
 
+function renderChannelTabs(){
+  const el=document.getElementById('channelTabs');
+  const channels=[{key:'base',label:'Base'},{key:'top',label:'Top'},{key:'pro',label:'Pro'}];
+  el.innerHTML='';
+  channels.forEach(ch=>{
+    const count=allBets.filter(b=>b.canali.includes(ch.key)).length;
+    const btn=document.createElement('button');
+    btn.className='channel-tab tab-'+ch.key+(ch.key===selectedChannel?' active':'');
+    btn.innerHTML=`${ch.label}<span class="tab-badge">${count}</span>`;
+    btn.onclick=()=>{selectedChannel=ch.key;selectedMonth=null;renderAll()};
+    el.appendChild(btn);
+  });
+}
+
 function renderKpiGlobal(bets){
   const g=calcStats(bets);
   document.getElementById('kpiBetTot').textContent=g.total;
@@ -411,14 +446,14 @@ function renderMonthKpi(bets,k){
   const ce=document.getElementById('mClv');ce.textContent=s.clvMean!==null?fmt(s.clvMean,2,true)+'%':'—';ce.className='mkpi-value '+(s.clvMean!==null?cc(s.clvMean):'amber');
 }
 
-function renderCharts(monthMap){
+function renderCharts(monthMap,channelBets){
   const keys=Object.keys(monthMap).sort();
   const labels=keys.map(monthLabel);
   const rois=keys.map(k=>parseFloat(calcStats(monthMap[k]).roi.toFixed(2)));
   const gc='rgba(255,255,255,0.05)',tc='#666';
   if(chartCapital)chartCapital.destroy();
   if(chartRoi)chartRoi.destroy();
-  const closedBets=allBets.filter(b=>['WIN','LOSS','VOID'].includes(b.esito)&&b.data).sort((a,b)=>a.data-b.data);
+  const closedBets=channelBets.filter(b=>['WIN','LOSS','VOID'].includes(b.esito)&&b.data).sort((a,b)=>a.data-b.data);
   let cum=0;const betLabels=[],betCumP=[];
   closedBets.forEach((b,i)=>{
     cum+=b.bilancio||0;
@@ -455,17 +490,19 @@ function renderSports(bets){
 }
 
 function renderAll(){
-  const monthMap=groupByMonth(allBets);
+  const channelBets=allBets.filter(b=>b.canali.includes(selectedChannel));
+  const monthMap=groupByMonth(channelBets);
   const keys=Object.keys(monthMap).sort().reverse();
   const now=new Date();
   const curKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const activeKey=selectedMonth||(monthMap[curKey]?curKey:keys[0]);
+  renderChannelTabs();
   renderSidebar(monthMap,activeKey);
-  renderKpiGlobal(allBets);
+  renderKpiGlobal(channelBets);
   renderMonthKpi(monthMap[activeKey]||[],activeKey);
-  renderCharts(monthMap);
-  renderClv(allBets);
-  renderSports(allBets);
+  renderCharts(monthMap,channelBets);
+  renderClv(channelBets);
+  renderSports(channelBets);
   const ts=new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('lastUpdate').textContent=`aggiornato ${ts}`;
   document.getElementById('footerUpdate').textContent=`Dati aggiornati alle ${ts}`;
