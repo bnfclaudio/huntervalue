@@ -410,7 +410,7 @@ function renderSidebar(monthMap,activeKey){
 
 function renderChannelTabs(){
   const el=document.getElementById('channelTabs');
-  const channels=[{key:'base',label:'Base'},{key:'top',label:'Top'},{key:'pro',label:'Pro'}];
+  const channels=[{key:'base',label:'Base'},{key:'pro',label:'Pro'},{key:'top',label:'Top'}];
   el.innerHTML='';
   channels.forEach(ch=>{
     const count=allBets.filter(b=>b.canali.includes(ch.key)).length;
