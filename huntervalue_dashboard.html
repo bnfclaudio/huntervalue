@@ -271,10 +271,11 @@ function parseBet(row){
   if(!['WIN','LOSS','VOID'].includes(esito))return null;
   const canaliRaw=String(row[29]||'').trim().toLowerCase();
   // righe storiche (precedenti alla colonna CANALI) non hanno questo campo -
-  // trattate come "pro" (il vecchio sistema mandava ogni alert senza filtri,
-  // stesso comportamento di pro oggi) - NON su base/top, che non hanno mai
-  // superato davvero, storicamente
-  const canali=canaliRaw?canaliRaw.split(',').map(c=>c.trim()).filter(Boolean):['pro'];
+  // trattate come "top" (il vecchio sistema mandava ogni alert senza filtri,
+  // e ora "top" e' il canale senza filtri nel nuovo assetto - aggiornato il
+  // 31/8 dopo lo scambio dei ruoli top/pro deciso lato backend) - NON su
+  // base/pro, che non hanno mai superato davvero, storicamente
+  const canali=canaliRaw?canaliRaw.split(',').map(c=>c.trim()).filter(Boolean):['top'];
   return{data:parseDate(row[0]||''),sport:String(row[2]||'').trim().toLowerCase(),esito,bilancio:pf(row[20])||0,valueQ:pf(row[13]),clvPct:pf(row[27]),canali};
 }
 
@@ -314,10 +315,12 @@ function groupByYear(monthMap){
 }
 
 function monthLabel(k){
+  if(!k)return'—';
   const[y,m]=k.split('-');
   return['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'][parseInt(m)-1]+' '+y;
 }
 function monthShort(k){
+  if(!k)return'—';
   const[y,m]=k.split('-');
   return['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'][parseInt(m)-1];
 }
